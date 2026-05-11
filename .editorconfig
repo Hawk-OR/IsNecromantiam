@@ -1,0 +1,27 @@
+# これがルートの設定である。上の階層のeditorconfigから設定を継承したい場合はfalseを指定する
+root = true
+
+# すべてのファイルが対象
+[*]
+
+# 基本は utf-8 にする
+charset = utf-8
+
+# インデントはスペース
+indent_style = space
+
+# インデントのスペースの数は4つ
+indent_size = 4
+
+# 改行コードはWindows標準のCRLFにする
+end_of_line = crlf
+
+# 最終行は必ず空行にする
+insert_final_newline = true
+
+# 行末の空白は除去する（残念ながら Visual Studio 2022 は対応していない模様）
+trim_trailing_whitespace = true
+
+# C/C++のソースコードは、BOM付き utf-8 にする
+[*.{c,cpp,h,cc,hh}]
+charset = utf-8-bom
