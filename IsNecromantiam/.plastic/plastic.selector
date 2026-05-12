@@ -1,4 +1,4 @@
-repository "IsNecromantiam/IsNecromantiam@15668808968349@cloud"
+repository "IsNecromantiam 2026-05-12_15-09-02/IsNecromantiam@15668808968349@cloud"
   path "/"
     br "/main"
     co "/main"

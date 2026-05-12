@@ -3,15 +3,16 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-public class Build
+public class Build : EditorWindow
 {
     private static BuildSetting m_Setting = null;
 
-    private static void Initialized()
+    private static bool Initialized()
     {
-        m_Setting = Resources.Load<BuildSetting>("BuildSetting");
+        return m_Setting != null;
     }
 
     [MenuItem("Build/Test")]
@@ -23,9 +24,10 @@ public class Build
         Debug.Log($"version: {version}");
     }
 
-    [MenuItem("Build/Build for Release")]
-    public static void ReleaseBuild()
+    private static void ReleaseBuild()
     {
+        if (!Initialized()) { Debug.LogError("Please set Build Setting!!"); return; }
+
         //  get version name
         string version = m_Setting.GetVersionAndSetTimeStamp();
 
@@ -33,10 +35,72 @@ public class Build
         BuildEvent.s_CopyFilesPath = m_Setting.CopyFilesPath;
 
         //  create "exe" directory
-        string directory = $"{Path.Combine(Application.dataPath, "../../../", "Exe")}/{version}";
-        System.IO.Directory.CreateDirectory(directory);
+        string directory = CreateExeDirectory(version);
+
+        Debug.Log(directory);
 
         //  get build options
+        var build = SetBuildOptions(version, directory);
+
+        //  build!!
+        var report = BuildPipeline.BuildPlayer(build);
+
+        CreateZipFile(report, version, directory);
+    }
+
+    public static void DebugBuild()
+    {
+        if (!Initialized()) { Debug.LogError("Please set Build Setting!!"); return; }
+
+        //  get version name
+        string version = m_Setting.GetVersion();
+
+        int j = 0; for (j = 0; j < version.Length; ++j) if (version[j] == 'a') break;
+        if (j == version.Length)
+        {
+            version += "a01";
+        }
+        else
+        {
+            var alpha = version.Substring(j + 1, version.Length - (j + 1));
+            var num = (int.Parse(alpha) + 1).ToString("00");
+            version = $"{version.Substring(0, j)}a{num}";
+        }
+
+        //  write time stamp in "ReleaseNote.txt"
+        m_Setting.WriteLine($"ver{version}({System.DateTime.Now})");
+
+        //  set copy file
+        BuildEvent.s_CopyFilesPath = m_Setting.CopyFilesPath;
+
+        //  create "exe" directory
+        string directory = CreateExeDirectory(version);
+
+        //  get build options
+        var build = SetBuildOptions(version, directory);
+
+        //  set Develop
+        build.options = BuildOptions.Development;
+
+        //  build!!
+        var report = BuildPipeline.BuildPlayer(build);
+
+        CreateZipFile(report, version, directory);
+    }
+
+    private static string CreateExeDirectory(string version)
+    {
+        string directory = m_Setting.ExePath;
+        Debug.Log(directory);
+        System.IO.Directory.CreateDirectory(directory);
+        return directory;
+    }
+
+    private static BuildPlayerOptions SetBuildOptions(string version, string directory)
+    {
+        PlayerSettings.bundleVersion = version;
+        PlayerSettings.productName = m_Setting.ProductName;
+
         string[] scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray();
         var activeTarget = EditorUserBuildSettings.activeBuildTarget;
         var activeGroup = BuildPipeline.GetBuildTargetGroup(activeTarget);
@@ -44,22 +108,22 @@ public class Build
         //  get build options
         var build = new BuildPlayerOptions();
         build.scenes = scenes;
-        build.locationPathName = $"{directory}/{PlayerSettings.productName}.exe";
+        build.locationPathName = $"{directory}/{m_Setting.ExeName}.exe";
         build.target = activeTarget;
         build.targetGroup = activeGroup;
 
-        PlayerSettings.bundleVersion = version;
+        return build;
+    }
 
-        //  build!!
-        var report = BuildPipeline.BuildPlayer(build);
-
+    private static void CreateZipFile(BuildReport report, string version, string directory)
+    {
         if (report != null)
         {
-            Debug.Log($"Build [{version}] in \"{PlayerSettings.productName}\"");
+            Debug.Log($"Build [{version}] in \"{m_Setting.ProductName}\"");
 
             //  ZIP!!!
-            if (File.Exists($"{directory}.zip")) Debug.LogError($"not zip in {version}.zip");
-            else ZipFile.CreateFromDirectory(directory, $"{directory}.zip");
+            if (File.Exists($"{directory}.zip")) File.Delete($"{directory}.zip");
+            ZipFile.CreateFromDirectory(directory, $"{directory}.zip");
 
             //  Open file
             System.Diagnostics.Process.Start(directory);
@@ -74,65 +138,26 @@ public class Build
         }
     }
 
-    [MenuItem("Build/BuildfFor Debug")]
-    public static void DebugBuild()
+    [MenuItem("Build/Open Build Window")]
+    private static void Open()
     {
-        //  get "ReleaseNote.txt"
-        string path = Application.dataPath + "/MyFolder/ReleaseNote.txt";
+        var window = GetWindow<Build>("Build");
+        window.Show();
+    }
 
-        //  get version name
-        string[] texts = File.ReadAllLines(path);
-        int i = 0; for (i = 0; i < texts[0].Length; ++i) if (texts[0][i] == '(') break;
-        string version = texts[0].Substring(0, i);
+    private void OnGUI()
+    {
+        EditorGUI.BeginChangeCheck();
 
-        int j = 0; for (j = 0; j < version.Length; ++j) if (version[j] == 'a') break;
-        if (j == version.Length)
+        m_Setting = EditorGUILayout.ObjectField("Build Setting", m_Setting, typeof(BuildSetting), false) as BuildSetting;
+
+        if (GUILayout.Button("Build for Release")) ReleaseBuild();
+
+        if (EditorGUI.EndChangeCheck())
         {
-            version += "a01";
+            Undo.RecordObject(m_Setting, "Change BuildSetting");
+            EditorUtility.SetDirty(m_Setting);
         }
-        else
-        {
-            var alpha = version.Substring(j + 1, version.Length - (j + 1));
-            var num = (int.Parse("01") + 1).ToString("00");
-            version = $"{version.Substring(0, j)}a{num}";
-        }
-
-        //  write time stamp in "ReleaseNote.txt"
-        texts[0] = $"{version}({System.DateTime.Now})";
-        File.WriteAllLines(path, texts);
-
-        //  set copy file
-        BuildEvent.s_CopyFilesPath = m_Setting.CopyFilesPath;
-
-        //  create "exe" directory
-        string directory = $"{Path.Combine(Application.dataPath, "../../../", "Exe")}/{version}";
-        System.IO.Directory.CreateDirectory(directory);
-
-        //  get build options
-        string[] scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray();
-        var activeTarget = EditorUserBuildSettings.activeBuildTarget;
-        var activeGroup = BuildPipeline.GetBuildTargetGroup(activeTarget);
-
-        //  set debug
-
-        //  get build options
-        var build = new BuildPlayerOptions();
-        build.scenes = scenes;
-        build.locationPathName = $"{directory}/{PlayerSettings.productName}.exe";
-        build.target = activeTarget;
-        build.targetGroup = activeGroup;
-
-        //  set Develop
-        build.options = BuildOptions.Development;
-
-        PlayerSettings.bundleVersion = version;
-
-        //  build!!
-        BuildPipeline.BuildPlayer(build);
-        Debug.Log($"Build [{version}] in \"{PlayerSettings.productName}\"");
-
-        //  Open file
-        System.Diagnostics.Process.Start(directory);
     }
 }
 #endif
