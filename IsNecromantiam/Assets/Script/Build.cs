@@ -1,13 +1,17 @@
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+using UnityEditor.UIElements;
 using UnityEngine;
 
 public class Build : EditorWindow
 {
+    [SerializeField] private static string m_CompanyName = "";
+
     private static BuildSetting m_Setting = null;
 
     private static bool Initialized()
@@ -100,6 +104,7 @@ public class Build : EditorWindow
     {
         PlayerSettings.bundleVersion = version;
         PlayerSettings.productName = m_Setting.ProductName;
+        PlayerSettings.companyName = m_CompanyName;
 
         string[] scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray();
         var activeTarget = EditorUserBuildSettings.activeBuildTarget;
@@ -147,17 +152,17 @@ public class Build : EditorWindow
 
     private void OnGUI()
     {
-        EditorGUI.BeginChangeCheck();
+        m_CompanyName = EditorGUILayout.TextField("Company Name", m_CompanyName);
+
+        EditorGUILayout.Space();
 
         m_Setting = EditorGUILayout.ObjectField("Build Setting", m_Setting, typeof(BuildSetting), false) as BuildSetting;
 
         if (GUILayout.Button("Build for Release")) ReleaseBuild();
 
-        if (EditorGUI.EndChangeCheck())
-        {
-            Undo.RecordObject(m_Setting, "Change BuildSetting");
-            EditorUtility.SetDirty(m_Setting);
-        }
+        EditorGUI.BeginChangeCheck();
+
+        EditorGUI.EndChangeCheck();
     }
 }
 #endif

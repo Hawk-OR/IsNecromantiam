@@ -266,10 +266,24 @@ public class BuildSetting : ScriptableObject
             if (i > list.Count) list.AddRange(new Object[i - list.Count]);
             else if (i < list.Count) list.RemoveRange(i, list.Count - i);
         }
+
         private void DrawCopyFiles(Rect rect, int index, bool isActive, bool isFocused)
         {
             m_Setting.m_CopyFiles[index] = EditorGUI.ObjectField(rect, m_Setting.m_CopyFiles[index], typeof(Object), false);
         }
+    }
+}
+
+[CustomPropertyDrawer(typeof(BuildSetting))]
+public class BuildSettingDrawer : PropertyDrawer
+{
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    {
+        EditorGUI.PropertyField(position, property, label, true);
+    }
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        return EditorGUI.GetPropertyHeight(property, label, true);
     }
 }
 #endif
