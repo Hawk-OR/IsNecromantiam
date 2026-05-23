@@ -10,7 +10,7 @@ public class MyCamera : MonoBehaviour
     [SerializeField] Vector3 m_LookPoint = new(0.0f, 1.0f, 0.0f);
     [SerializeField] float m_CameraLength = 2.0f;
 
-    public Vector2 m_CameraAngle = Vector2.zero;
+    private Vector2 m_CameraAngle = Vector2.zero;
 
     [SerializeField] float m_MoveSpeed = 1.0f;
     [SerializeField] float m_RotaSpeed = 90.0f;
@@ -20,6 +20,9 @@ public class MyCamera : MonoBehaviour
     private void Awake()
     {
         m_Input = InputSystem.actions.FindActionMap("Player");
+
+        var offset = Quaternion.LookRotation(m_Offset).eulerAngles;
+        m_CameraAngle.x += offset.y; m_CameraAngle.y += offset.x;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -35,18 +38,16 @@ public class MyCamera : MonoBehaviour
 
         var move = m_Target.position;
         {
-            var offset = Quaternion.LookRotation(m_Offset).eulerAngles;
-
             var axis = m_Input.FindAction("Look").ReadValue<Vector2>();
             var speed = m_RotaSpeed * Time.deltaTime;
 
             m_CameraAngle.x = m_CameraAngle.x + axis.x * speed;
             m_CameraAngle.y = Mathf.Clamp(m_CameraAngle.y + axis.y * speed, -80f, +80f);
 
-            var angleXZ = m_CameraAngle.x + offset.y * Mathf.Deg2Rad;
+            var angleXZ = m_CameraAngle.x;
             Quaternion xz = Quaternion.AngleAxis(angleXZ, Vector3.up);
 
-            var angleXY = m_CameraAngle.y + offset.x * Mathf.Deg2Rad;
+            var angleXY = m_CameraAngle.y;
             Quaternion yz = Quaternion.AngleAxis(angleXY, transform.right);
 
             Vector3 cameraVec = (yz * xz) * Vector3.forward;

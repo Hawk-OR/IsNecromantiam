@@ -459,10 +459,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MyCamera
   m_Target: {fileID: 1519337960}
-  m_Offset: {x: 0, y: 1.5, z: -1}
+  m_Offset: {x: 0, y: -0.5, z: -1}
   m_LookPoint: {x: 0, y: 1, z: 0}
   m_CameraLength: 3
-  m_CameraAngle: {x: 0, y: 0}
+  m_CameraMaxY: {x: -80, y: 80}
   m_MoveSpeed: 8
   m_RotaSpeed: 90
 --- !u!1 &1028251547
