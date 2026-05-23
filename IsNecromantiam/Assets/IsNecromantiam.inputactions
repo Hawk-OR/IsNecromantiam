@@ -19,8 +19,8 @@
                     "name": "Look",
                     "type": "Value",
                     "id": "b3b67c10-0c00-44fb-8931-17b0c25cda07",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
+                    "expectedControlType": "Axis",
+                    "processors": "AxisDeadzone",
                     "interactions": "",
                     "initialStateCheck": true
                 },

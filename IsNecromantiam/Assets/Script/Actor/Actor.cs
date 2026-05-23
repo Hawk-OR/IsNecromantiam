@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Actor : MonoBehaviour
@@ -10,7 +11,9 @@ public class Actor : MonoBehaviour
         public float WalkSpeed = 2.0f;
         public float Accelerator = 2.0f;
         public float Brake = 2.0f;
-        [Header("")]
+        public float RotationSpeed = 5.0f;
+
+        [Space(10)]
         public float Jump = 1.0f;
     }
 
@@ -20,9 +23,16 @@ public class Actor : MonoBehaviour
     protected const float k_Gravity = 9.81f;
     protected static int? s_GroundLayer = null;
 
-    protected const float k_Resistance = 10.0f;
+    protected float p_Resistance => 2.0f * (m_Parameter.Weight / 10.0f);
 
     protected Vector3 m_Velocity = Vector3.zero;
+
+    [SerializeField] protected Animator m_Animator = null;
+
+    protected virtual void Reset()
+    {
+        m_Animator = this.GetOrAddComponent<Animator>();
+    }
 
     protected virtual void Awake()
     {
@@ -44,7 +54,7 @@ public class Actor : MonoBehaviour
 
         //  
         var horizontal = new Vector2(m_Velocity.x, m_Velocity.z);
-        var length = Mathf.Max(horizontal.magnitude - k_Resistance * Time.deltaTime, 0.0f);
+        var length = Mathf.Max(horizontal.magnitude - p_Resistance * Time.deltaTime, 0.0f);
         var vec = horizontal.normalized * length;
         m_Velocity = new(vec.x, m_Velocity.y, vec.y);
     }
@@ -83,7 +93,7 @@ public class Actor : MonoBehaviour
         m_Velocity = Vector3.zero;
     }
 
-    protected void AddMove(Vector2 value)
+    protected void AddMove(Vector3 value)
     {
         var vec = value;
         if (value.magnitude > 0.0f)
@@ -97,7 +107,7 @@ public class Actor : MonoBehaviour
             vec = m_Velocity.xz().normalized * length;
         }
 
-        m_Velocity.x += vec.x; m_Velocity.z += vec.y;
+        vec.y = 0.0f; m_Velocity += vec;
     }
 
     protected void AddJump(bool canJump = true)
