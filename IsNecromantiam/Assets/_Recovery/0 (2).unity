@@ -493,7 +493,7 @@ MonoBehaviour:
   m_Target: {fileID: 1519337960}
   m_Offset: {x: 0, y: -0.5, z: -1}
   m_LookPoint: {x: 0, y: 1, z: 0}
-  m_CameraLength: 5
+  m_CameraLength: 3
   m_MoveSpeed: 8
   m_RotaSpeed: 90
 --- !u!1 &1028251547
@@ -699,13 +699,6 @@ MonoBehaviour:
   m_Animator: {fileID: 1519337963}
   m_Camera: {fileID: 916751267}
   m_Target: {fileID: 265603324}
-  m_SummonParam:
-    summonPrefab:
-    - {fileID: 1788221301}
-    radius: 5
-    speed: 0.1
-    amount: 1
-  m_Servants: []
 --- !u!95 &1519337963
 Animator:
   serializedVersion: 7
@@ -848,7 +841,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0, y: 0.25, z: 0}
-  m_LocalScale: {x: 1, y: 0.25, z: 1}
+  m_LocalScale: {x: 6, y: 0.25, z: 6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 265603324}
