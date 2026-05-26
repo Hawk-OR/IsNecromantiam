@@ -20,11 +20,11 @@ public class TitleScene : MonoBehaviour
 
     public void EndGame()
     {
-        GameManager.Instance().EndGame();
+        GameManager.GetInstance().EndGame();
     }
 
     public void ChangeScene(string sceneName)
     {
-        GameManager.Instance().ChangeSceneLoadFade(sceneName, 1.0f);
+        GameManager.GetInstance().ChangeSceneLoadFade(sceneName, 1.0f);
     }
 }

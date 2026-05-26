@@ -10,7 +10,7 @@ public class LoadScene : MonoBehaviour
     void Start()
     {
         var color = m_Image.color; color.a = 1.0f;
-        m_Image.DOColor(color, 1.0f).OnComplete(() => GameManager.Instance().ChangeNextSceneFade());
+        m_Image.DOColor(color, 1.0f).OnComplete(() => GameManager.GetInstance().ChangeNextSceneFade());
     }
 
     // Update is called once per frame

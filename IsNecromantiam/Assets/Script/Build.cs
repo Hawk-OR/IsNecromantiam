@@ -28,6 +28,11 @@ public class Build : EditorWindow
         Debug.Log($"version: {version}");
     }
 
+    private void Reset()
+    {
+        m_CompanyName = PlayerSettings.companyName;
+    }
+
     private static void ReleaseBuild()
     {
         if (!Initialized()) { Debug.LogError("Please set Build Setting!!"); return; }
@@ -105,6 +110,10 @@ public class Build : EditorWindow
         PlayerSettings.bundleVersion = version;
         PlayerSettings.productName = m_Setting.ProductName;
         PlayerSettings.companyName = m_CompanyName;
+
+        PlayerSettings.fullScreenMode = m_Setting.GetScreenMode(out var size);
+        PlayerSettings.defaultScreenWidth = size.x;
+        PlayerSettings.defaultScreenHeight = size.y;
 
         string[] scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray();
         var activeTarget = EditorUserBuildSettings.activeBuildTarget;

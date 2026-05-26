@@ -43,6 +43,9 @@ public class BuildSetting : ScriptableObject
 
     [SerializeField] List<Object> m_CopyFiles = new List<Object>();
 
+    [SerializeField] FullScreenMode m_ScreenMode = FullScreenMode.FullScreenWindow;
+    [SerializeField] Vector2Int m_ScreenSize = new(1920, 1080);
+
     public string ProductName => m_ProductName;
 
     private void Reset()
@@ -136,6 +139,14 @@ public class BuildSetting : ScriptableObject
         }
     }
 
+    public FullScreenMode GetScreenMode() => m_ScreenMode;
+
+    public FullScreenMode GetScreenMode(out Vector2Int screenSize)
+    {
+        screenSize = m_ScreenSize;
+        return m_ScreenMode;
+    }
+
     //  Custom Editor
     [CustomEditor(typeof(BuildSetting))]
     private class MyEditor : Editor
@@ -157,7 +168,24 @@ public class BuildSetting : ScriptableObject
         {
             EditorGUI.BeginChangeCheck();
 
+            if (GUILayout.Button("Reload")) ReLoad();
+
             m_Setting.m_ProductName = EditorGUILayout.TextField("Product Name", m_Setting.m_ProductName);
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField("Screen Mode", GUILayout.Width(80));
+                m_Setting.m_ScreenMode = (FullScreenMode)EditorGUILayout.EnumPopup(m_Setting.m_ScreenMode, GUILayout.Width(130));
+
+                if (m_Setting.m_ScreenMode == FullScreenMode.Windowed)
+                {
+                    EditorGUILayout.LabelField("Screen Size", GUILayout.Width(70));
+                    m_Setting.m_ScreenSize = EditorGUILayout.Vector2IntField("", m_Setting.m_ScreenSize);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
 
@@ -270,6 +298,12 @@ public class BuildSetting : ScriptableObject
         private void DrawCopyFiles(Rect rect, int index, bool isActive, bool isFocused)
         {
             m_Setting.m_CopyFiles[index] = EditorGUI.ObjectField(rect, m_Setting.m_CopyFiles[index], typeof(Object), false);
+        }
+
+        private void ReLoad()
+        {
+            SetName(m_Setting.m_ExeName, ref m_Setting.m_Exe);
+            SetName(m_Setting.m_ExeFileName, ref m_Setting.m_ExeFile);
         }
     }
 }

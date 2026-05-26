@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class Test : MonoBehaviour
 {
+    public PlayerInput input;
+
     private void Awake()
     {
     }
@@ -11,11 +13,15 @@ public class Test : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        GameManager.Instance().ChangeScene("PlayScene", 1.0f);
     }
 
     // Update is called once per frame
     void Update()
     {
+    }
+
+    private void OnDebug(InputAction.CallbackContext context)
+    {
+        Debug.Log("Debug");
     }
 }

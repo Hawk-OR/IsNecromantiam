@@ -1,6 +1,8 @@
 using DG.Tweening;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -13,19 +15,41 @@ public class GameManager : MonoBehaviour
     private AsyncOperation m_AsyncOperation = null;
     private string m_NextScene = "TitleScene";
 
+    private static PlayerInput m_InputAction = null;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void Initialize()
     {
+        //  create GameManager
         GameObject obj = new GameObject("GameManager");
         m_Instance = obj.AddComponent<GameManager>();
+
+        //  create input action
+        var input = obj.AddComponent<PlayerInput>();
+        {
+            input.actions = Resources.Load<InputActionAsset>("InputActions");
+            input.defaultActionMap = "Player";
+            input.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
+
+            //  enable all actions
+            foreach (var action in input.actions) action.Enable();
+
+            m_InputAction = input;
+        }
 
         DontDestroyOnLoad(obj);
     }
 
-    public static GameManager Instance()
+    public static GameManager GetInstance() => m_Instance;
+
+    public static PlayerInput GetInputActions()
     {
-        return m_Instance;
+        if (m_InputAction == null) m_InputAction = m_Instance.GetOrAddComponent<PlayerInput>();
+
+        return m_InputAction;
     }
+
+    public static InputAction GetAction(string name,bool throwIfNotFound = true) => GetInputActions().actions.FindAction(name, throwIfNotFound);
 
     void Awake()
     {
@@ -34,6 +58,7 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //  create fade image
         m_Image = CreateImage();
     }
 

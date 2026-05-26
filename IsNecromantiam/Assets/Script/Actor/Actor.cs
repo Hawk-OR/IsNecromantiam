@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -116,5 +117,17 @@ public class Actor : MonoBehaviour
         {
             m_Velocity.y += m_Parameter.Jump * Time.deltaTime;
         }
+    }
+
+    protected bool IsNullChecks(object[] checks)
+    {
+        int result = 0;
+
+        foreach (var check in checks) if (check == null) result++;
+
+        if (result == 0) return false;
+
+        Debug.LogError($"Null check failed: {result} null reference(s) found.");
+        return true;
     }
 }
