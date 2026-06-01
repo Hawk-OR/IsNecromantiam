@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -59,6 +60,7 @@ public class Player : Actor
     // Update is called once per frame
     protected override void Update()
     {
+        // Handle summoning servants
         var rt = m_Input.actions.FindAction("RTrigger").ReadValue<float>();
         if (Gamepad.current != null)
         {
@@ -70,18 +72,7 @@ public class Player : Actor
                 if (m_SummonTimer >= m_SummonParam.speed)
                 {
                     m_SummonTimer = 0.0f;
-
-                    var param = m_SummonParam;
-                    for (int i = 0; i < param.amount; i++)
-                    {
-                        var length = Random.Range(0.0f, param.radius);
-                        var vec = Vector3Extensions.AngleTo(Random.Range(0.0f, 360.0f));
-                        var pos = m_Target.position + vec * length;
-                        var spawnObj = param.summonPrefab[Random.Range(0, param.summonPrefab.Count)] as GameObject;
-                        var obj = Instantiate<GameObject>(spawnObj, pos, transform.rotation);
-                        obj.AddComponent<Servants>();
-                        m_Servants.Add(obj.GetComponent<Servants>());
-                    }
+                    m_Servants.AddRange(CreateServant());
                 }
             }
             else
@@ -90,6 +81,7 @@ public class Player : Actor
             }
         }
 
+        // Remove null servants
         for (int i = 0; i < m_Servants.Count;)
         {
             if (m_Servants[i] == null) m_Servants.RemoveAt(i);
@@ -110,16 +102,9 @@ public class Player : Actor
             var forward = m_Camera.transform.forward; forward.y = 0.0f;
             var right = m_Camera.transform.right; right.y = 0.0f;
             moveVec = forward.normalized * axis.y + right.normalized * axis.x;
-            moveVec.Normalize();
         }
-        AddMove(moveVec.normalized);
-
-        if (moveVec.magnitude > 0.0f)
-        {
-            var look = Quaternion.LookRotation(moveVec, transform.up);
-            var roto = Quaternion.SlerpUnclamped(transform.rotation, look, m_Parameter.RotationSpeed * Time.deltaTime);
-            transform.rotation = roto;
-        }
+        AddWalk(moveVec);
+        AddRotate(moveVec);
 
         base.Update();
 
@@ -138,5 +123,24 @@ public class Player : Actor
 
         if (value > 0.5f) m_ControlMode = ControlMode.Target;
         else m_ControlMode = ControlMode.Camera;
+    }
+
+    private Servants[] CreateServant()
+    {
+        var param = m_SummonParam;
+        var servants = new Servants[param.amount];
+
+        if (param.summonPrefab.Count == 0) return servants;
+        for (int i = 0; i < param.amount; i++)
+        {
+            var length = Random.Range(0.0f, param.radius);
+            var vec = Random.Range(0.0f, 360.0f).AngleToVector3();
+            var pos = m_Target.position + vec * length;
+            var spawnObj = param.summonPrefab[Random.Range(0, param.summonPrefab.Count)];
+            var obj = Instantiate<GameObject>((GameObject)spawnObj, pos, Quaternion.LookRotation(vec));
+            servants[i] = obj.GetOrAddComponent<Servants>();
+        }
+
+        return servants;
     }
 }
