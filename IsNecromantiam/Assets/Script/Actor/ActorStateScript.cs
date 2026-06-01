@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Transition
 {
@@ -32,7 +33,7 @@ public class Transition
     }
 }
 
-public abstract class ActorStateScript
+public class ActorStateScript
 {
     protected Actor m_Actor = null;
     protected List<Transition> m_Transition = new List<Transition>();
@@ -52,6 +53,9 @@ public abstract class ActorStateScript
 
     public IReadOnlyList<Transition> Transition => m_Transition;
 
+    public IReadOnlyList<Action> StartFunc => m_StartFunc;
+    public IReadOnlyList<Action> ExitFunc => m_ExitFunc;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public virtual void Start()
     {
@@ -59,7 +63,10 @@ public abstract class ActorStateScript
     }
 
     // Update is called once per frame
-    public abstract void Update();
+    public virtual void Update()
+    {
+
+    }
 
     public virtual void Exit()
     {
@@ -83,10 +90,49 @@ public abstract class ActorStateScript
         return this;
     }
 
+    public ActorStateScript AddStartFuncs(Action[] func)
+    {
+        if (m_StartFunc == null) m_StartFunc = new List<Action>();
+        m_StartFunc.AddRange(func);
+        return this;
+    }
+
+    public void ClearStartFunc()
+    {
+        m_StartFunc = null;
+    }
+
     public ActorStateScript AddExitFunc(Action func)
     {
         if (m_ExitFunc == null) m_ExitFunc = new List<Action>();
         m_ExitFunc.Add(func);
         return this;
+    }
+
+    public ActorStateScript AddExitFuncs(Action[] func)
+    {
+        if (m_ExitFunc == null) m_ExitFunc = new List<Action>();
+        m_ExitFunc.AddRange(func);
+        return this;
+    }
+
+    public void ClearExitFunc()
+    {
+        m_ExitFunc = null;
+    }
+
+    protected bool CanLookPoint(Vector3 point)
+    {
+        var dir = point - m_Actor.transform.position;
+        var length = dir.magnitude;
+        if (length > m_Actor.Parameters.EyeSight) return false;
+
+        var angle = Vector3.Angle(m_Actor.transform.forward, dir);
+        if (MathF.Abs(angle) > m_Actor.Parameters.ViewAngle) return false;
+
+        Vector3
+            start = m_Actor.transform.position + Vector3.up * 0.5f,
+            end = point + Vector3.up * 0.5f;
+        return !Physics.Linecast(start, end, LayerMask.GetMask("Ground"));
     }
 }

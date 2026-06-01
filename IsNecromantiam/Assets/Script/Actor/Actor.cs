@@ -7,7 +7,8 @@ public class Actor : MonoBehaviour
     [System.Serializable]
     public class Parameter
     {
-        public float Weight = 20.0f;
+        [Tooltip("The weight of the actor, affecting movement and gravity.")]public float Weight = 20.0f;
+
         [Header("Move")]
         public float WalkSpeed = 2.0f;
         public float Accelerator = 2.0f;
@@ -17,7 +18,7 @@ public class Actor : MonoBehaviour
         [Header("Status")]
         public float HP = 100.0f;
         public float EyeSight = 10.0f;
-        public float VisionAngle = 120.0f;
+        public float ViewAngle = 120.0f;
         public float Jump = 1.0f;
     }
 
@@ -126,7 +127,7 @@ public class Actor : MonoBehaviour
     public void AddWalk(Vector3 value)
     {
         var vec = value;
-        if (value.magnitude > 0.0f)
+        if (value.magnitude > 0.0f && Mathf.Abs(RotateAngle()) < 45.0f)
         {
             var length = (m_Velocity.magnitude > m_Parameter.WalkSpeed) ? 0.0f : m_Parameter.Accelerator;
             vec = value * (length * Time.deltaTime);

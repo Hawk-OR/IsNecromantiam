@@ -24,6 +24,8 @@ public class Player : Actor
 
     [SerializeField] List<Servants> m_Servants = new();
 
+    public List<Transform> m_TargetTest = new();
+
     enum ControlMode
     {
         Camera,
@@ -137,8 +139,9 @@ public class Player : Actor
             var vec = Random.Range(0.0f, 360.0f).AngleToVector3();
             var pos = m_Target.position + vec * length;
             var spawnObj = param.summonPrefab[Random.Range(0, param.summonPrefab.Count)];
+            servants[i] = spawnObj.GetOrAddComponent<Servants>();
+            servants[i].SetTarget(m_TargetTest[Random.Range(0, m_TargetTest.Count)]);
             var obj = Instantiate<GameObject>((GameObject)spawnObj, pos, Quaternion.LookRotation(vec));
-            servants[i] = obj.GetOrAddComponent<Servants>();
         }
 
         return servants;

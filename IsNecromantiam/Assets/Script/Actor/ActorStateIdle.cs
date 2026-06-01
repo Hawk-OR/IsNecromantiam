@@ -5,7 +5,7 @@ public class ActorStateIdle : ActorStateScript
     private float m_IdleTime = 0.0f;
     private float m_Timer = 0.0f;
 
-    public ActorStateIdle(Actor actor, string next, float transitionTime) : this(actor, new Transition[] { })
+    public ActorStateIdle(Actor actor, float transitionTime, string next) : this(actor, new Transition[] { })
     {
         m_IdleTime = transitionTime;
 

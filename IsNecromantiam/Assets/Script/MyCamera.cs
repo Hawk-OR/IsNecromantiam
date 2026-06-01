@@ -41,6 +41,8 @@ public class MyCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (m_Target == null) this.enabled = false;
+
         var lookPoint = m_Target.position + m_LookPoint;
 
         var move = m_Target.position;

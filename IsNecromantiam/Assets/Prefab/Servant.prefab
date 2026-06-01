@@ -54,11 +54,12 @@ MonoBehaviour:
     Brake: 50
     RotationSpeed: 180
     HP: 100
-    EyeSight: 10
-    VisionAngle: 120
+    EyeSight: 100
+    ViewAngle: 180
     Jump: 10
   m_Animator: {fileID: 7712326168493390478}
   m_StateMachine: {fileID: -3460943695571664923}
+  m_Target: {fileID: 0}
 --- !u!114 &-3460943695571664923
 MonoBehaviour:
   m_ObjectHideFlags: 0

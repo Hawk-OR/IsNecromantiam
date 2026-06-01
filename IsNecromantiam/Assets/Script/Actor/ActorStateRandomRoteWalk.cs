@@ -5,7 +5,7 @@ public class ActorStateRandomRoteWalk : ActorStateScript
     private float m_WalkTime = 1.0f;
     private float m_Timer = 0.0f;
 
-    public ActorStateRandomRoteWalk(Actor actor, string next, float walkTime) : this(actor, new Transition[] { })
+    public ActorStateRandomRoteWalk(Actor actor, float walkTime, string next) : this(actor, new Transition[] { })
     {
         m_WalkTime = walkTime;
 
