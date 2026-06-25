@@ -356,6 +356,17 @@
                     "action": "Quit",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "dcc1c27d-c57c-4ac9-b03c-76ba4d252787",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse;Gamepad",
+                    "action": "Quit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },

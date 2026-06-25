@@ -49,7 +49,7 @@ public class GameManager : MonoBehaviour
         return m_InputAction;
     }
 
-    public static InputAction GetAction(string name,bool throwIfNotFound = true) => GetInputActions().actions.FindAction(name, throwIfNotFound);
+    public static InputAction GetAction(string name, bool throwIfNotFound = true) => GetInputActions().actions.FindAction(name, throwIfNotFound);
 
     void Awake()
     {
@@ -60,12 +60,13 @@ public class GameManager : MonoBehaviour
     {
         //  create fade image
         m_Image = CreateImage();
+
+        GetInputActions().actions["Quit"].performed += __ => EndGame();
     }
 
     // Update is called once per frame
     void Update()
     {
-
     }
 
     public float LoadingSceneProgress() => m_AsyncOperation != null ? m_AsyncOperation.progress : 0.0f;

@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -8,7 +10,19 @@ using UnityEditor;
 
 public class StateMachine : MonoBehaviour
 {
-    [SerializeField] Dictionary<string, ActorStateScript> m_Machine = null;
+    private class Action
+    {
+        public ActorStateScript action = null;
+        public bool trigger = false;
+
+        public Action(ActorStateScript action)
+        {
+            this.action = action;
+            trigger = false;
+        }
+    }
+
+    [SerializeField] Dictionary<string, Action> m_Machine = null;
     [SerializeField] string m_CurrentState = "Idle";
 
     private void Awake()
@@ -29,18 +43,30 @@ public class StateMachine : MonoBehaviour
 
         current.Update();
         if (current.OnTransition(out var next))
+        {
+            m_Machine[m_CurrentState].trigger = false;
             if (!ChangeState(next))
                 UnEnableMessage($"Failed to change state to {next}");
+        }
+
+        foreach (var f in m_Machine.Values)
+        {
+            f.action.FixedUpdate();
+
+            if (f.action.OnFixedTransition(out next))
+                if (!ChangeState(next))
+                    UnEnableMessage($"Failed to change state to {next}");
+        }
     }
 
     public bool ChangeState(string name)
     {
         if (m_Machine.TryGetValue(name, out var next))
         {
-            m_Machine[m_CurrentState].Exit();
+            m_Machine[m_CurrentState].action.Exit();
 
             m_CurrentState = name;
-            next.Start();
+            next.action.Start();
             return true;
         }
         return false;
@@ -54,17 +80,32 @@ public class StateMachine : MonoBehaviour
 
     public ActorStateScript Add(string name, ActorStateScript state)
     {
-        if (m_Machine == null) m_Machine = new Dictionary<string, ActorStateScript>();
+        if (m_Machine == null) m_Machine = new Dictionary<string, Action>();
 
-        m_Machine.Add(name, state);
+        m_Machine.Add(name, new(state));
         if (m_Machine.Count == 1) m_CurrentState = name;
 
         return state;
     }
 
-    public ActorStateScript Get(string name) => m_Machine.TryGetValue(name, out var state) ? state : null;
+    public ActorStateScript Get(string name) => m_Machine.TryGetValue(name, out var state) ? state.action : null;
 
-    private ActorStateScript GetCurrentState() => m_Machine[m_CurrentState];
+    public void SetTrigger(string name)
+    {
+        if (m_Machine.TryGetValue(name, out var trigger)) trigger.trigger = true;
+    }
+
+    public bool Trigger(string name) => m_Machine.TryGetValue(name, out var trigger) ? trigger.trigger : false;
+
+    private string GetCurrentStateName() => m_CurrentState;
+    private ActorStateScript GetCurrentState() => m_Machine[m_CurrentState].action;
+
+    public bool CheckState(string[] states)
+    {
+        foreach (var s in states)
+            if (s == m_CurrentState) return true;
+        return false;
+    }
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(StateMachine))]

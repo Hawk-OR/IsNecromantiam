@@ -30,6 +30,8 @@ public class MyCamera : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (m_Target == null) m_Target = GameObject.FindWithTag("Player").transform;
+
         if (m_Target == null) this.enabled = false;
 
         m_Input = GameManager.GetInputActions();
@@ -41,7 +43,7 @@ public class MyCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (m_Target == null) this.enabled = false;
+        if (m_Target == null) return;
 
         var lookPoint = m_Target.position + m_LookPoint;
 
